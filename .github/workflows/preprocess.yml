@@ -30,11 +30,11 @@ jobs:
           git config --global user.email "ci@dbzh-pilot.fr"
           datalad clone \
             https://x-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} \
-            /work/dbzh
+            "${RUNNER_TEMP}/dbzh"
 
       # 3. Télécharger uniquement les fichiers EEG bruts (depuis l'annex remote)
       - name: Get raw EEG files
-        working-directory: /work/dbzh
+        working-directory: ${{ runner.temp }}/dbzh
         run: |
           datalad get data/raw/**/*.edf data/raw/**/*.fif data/raw/**/*.set 2>/dev/null || true
           echo "Fichiers bruts disponibles :"
@@ -43,7 +43,7 @@ jobs:
       # 4. Lancer le prétraitement avec provenance DataLad
       #    datalad run enregistre : quelle commande, quel input, quel output
       - name: Preprocess new EEG files
-        working-directory: /work/dbzh
+        working-directory: ${{ runner.temp }}/dbzh
         run: |
           set -e
           processed=0
@@ -80,7 +80,7 @@ jobs:
       # 5. Pousser les résultats vers GitHub
       #    (les gros .fif vont dans l'annex, les JSON de rapport dans Git)
       - name: Push processed results
-        working-directory: /work/dbzh
+        working-directory: ${{ runner.temp }}/dbzh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
