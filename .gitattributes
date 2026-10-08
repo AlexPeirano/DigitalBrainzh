@@ -1,3 +1,20 @@
 * annex.backend=MD5E
 **/.git* annex.largefiles=nothing
-* annex.largefiles=((mimeencoding=binary)and(largerthan=0))
+
+# ── Fichiers EEG volumineux → git-annex (stockage externe) ──────────────────
+data/raw/**/*.edf   annex.largefiles=anything
+data/raw/**/*.fif   annex.largefiles=anything
+data/raw/**/*.set   annex.largefiles=anything
+data/raw/**/*.eeg   annex.largefiles=anything
+data/processed/**/*.fif annex.largefiles=anything
+
+# ── Petits fichiers de métadonnées → Git direct (pas l'annex) ───────────────
+data/**/*.json  annex.largefiles=nothing
+data/**/*.tsv   annex.largefiles=nothing
+data/**/*.csv   annex.largefiles=nothing
+
+# ── Code + config → toujours dans Git ───────────────────────────────────────
+code/**         annex.largefiles=nothing
+*.yml           annex.largefiles=nothing
+*.txt           annex.largefiles=nothing
+*.md            annex.largefiles=nothing

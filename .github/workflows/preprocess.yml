@@ -1,0 +1,93 @@
+name: EEG Preprocessing Pipeline (DataLad)
+
+# Déclenchement : uniquement quand un fichier dans data/raw/ est modifié
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/raw/**'
+
+jobs:
+  preprocess:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Installer git-annex + DataLad + MNE sur la VM
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y git-annex
+
+      - name: Install Python dependencies
+        run: pip install datalad mne numpy
+
+      # 2. Cloner le dataset DataLad (juste les pointeurs, sans les gros fichiers)
+      - name: Clone DataLad dataset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name  "CI Bot DBZH"
+          git config --global user.email "ci@dbzh-pilot.fr"
+          datalad clone \
+            https://x-token:${GITHUB_TOKEN}@github.com/${{ github.repository }} \
+            /work/dbzh
+
+      # 3. Télécharger uniquement les fichiers EEG bruts (depuis l'annex remote)
+      - name: Get raw EEG files
+        working-directory: /work/dbzh
+        run: |
+          datalad get data/raw/**/*.edf data/raw/**/*.fif data/raw/**/*.set 2>/dev/null || true
+          echo "Fichiers bruts disponibles :"
+          find data/raw -name "*.edf" -o -name "*.fif" -o -name "*.set" | sort
+
+      # 4. Lancer le prétraitement avec provenance DataLad
+      #    datalad run enregistre : quelle commande, quel input, quel output
+      - name: Preprocess new EEG files
+        working-directory: /work/dbzh
+        run: |
+          set -e
+          processed=0
+
+          find data/raw -name "*_eeg.edf" -o -name "*_eeg.fif" -o -name "*_eeg.set" \
+          | sort | while read input_file; do
+
+            # Construire le chemin de sortie correspondant
+            output_file="${input_file/data\/raw/data\/processed}"
+            output_file="${output_file/_eeg.edf/_eeg_filtered.fif}"
+            output_file="${output_file/_eeg.fif/_eeg_filtered.fif}"
+            output_file="${output_file/_eeg.set/_eeg_filtered.fif}"
+
+            # Ne traiter que les fichiers pas encore traités
+            if [ ! -f "$output_file" ]; then
+              echo "--- Traitement : $input_file"
+
+              datalad run \
+                --input  "$input_file" \
+                --output "$output_file" \
+                --message "ci: preprocess $(basename $input_file)" \
+                "python code/preprocess.py \
+                  --input  {inputs} \
+                  --output {outputs}"
+
+              processed=$((processed + 1))
+            else
+              echo "--- Déjà traité, ignoré : $output_file"
+            fi
+          done
+
+          echo "Fichiers traités : $processed"
+
+      # 5. Pousser les résultats vers GitHub
+      #    (les gros .fif vont dans l'annex, les JSON de rapport dans Git)
+      - name: Push processed results
+        working-directory: /work/dbzh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Vérifier s'il y a des changements à pusher
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "Rien de nouveau à pusher."
+          else
+            datalad push --to origin
+            echo "Résultats pushés vers GitHub."
+          fi
