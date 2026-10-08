@@ -121,40 +121,38 @@ def main():
     # ── Sauvegarde ───────────────────────────────────────────────────────────
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # MNE exige que le fichier .fif se termine par _raw.fif ou _filtered.fif
-    if not str(output_path).endswith(("_raw.fif", "_filtered.fif", "-raw.fif")):
-        output_path = output_path.with_name(
-            output_path.stem.replace("_filtered", "") + "_filtered.fif"
-        )
+    # MNE exige que le fichier se termine par _eeg.fif, _raw.fif, etc.
+    # On force _eeg.fif qui est la convention BIDS pour l'EEG
+    fif_path = output_path.parent / (
+        output_path.name
+        .replace("_eeg_filtered.fif", "_eeg.fif")
+        .replace("_filtered.fif", "_eeg.fif")
+    )
 
-    raw.save(str(output_path), overwrite=True, verbose=False)
-    print(f"[OK] Signal traité → {output_path}")
+    raw.save(str(fif_path), overwrite=True, verbose=False)
+    print(f"[OK] Signal traité → {fif_path}")
 
     # ── Rapport qualité ──────────────────────────────────────────────────────
     data_filtered = raw.get_data()
     report = {
         "input":   str(input_path),
-        "output":  str(output_path),
+        "output":  str(fif_path),
         "status":  "success",
         "metrics": {
-            "n_channels":       n_channels,
-            "n_samples":        n_samples,
-            "sfreq_hz":         sfreq,
-            "duration_s":       round(duration_s, 2),
-            "bad_channels":     bad_channels,
-            "n_bad_channels":   len(bad_channels),
-            "filter_l_freq_hz": args.l_freq,
-            "filter_h_freq_hz": args.h_freq,
+            "n_channels":        int(n_channels),
+            "n_samples":         int(n_samples),
+            "sfreq_hz":          float(sfreq),
+            "duration_s":        round(float(duration_s), 2),
+            "bad_channels":      bad_channels,
+            "n_bad_channels":    int(len(bad_channels)),
+            "filter_l_freq_hz":  float(args.l_freq),
+            "filter_h_freq_hz":  float(args.h_freq),
             "amplitude_mean_uv": round(float(np.mean(np.abs(data_filtered)) * 1e6), 4),
-            "quality":          "good" if len(bad_channels) < n_channels * 0.2 else "poor",
+            "quality":           "good" if len(bad_channels) < n_channels * 0.2 else "poor",
         },
     }
 
-    report_path = output_path.parent / (
-        output_path.name
-        .replace("_eeg_filtered.fif", "_report.json")
-        .replace("_filtered.fif",     "_report.json")
-    )
+    report_path = fif_path.parent / fif_path.name.replace("_eeg.fif", "_report.json")
     report_path.write_text(json.dumps(report, indent=2))
     print(f"[OK] Rapport qualité → {report_path}")
     print(f"[OK] Qualité : {report['metrics']['quality'].upper()} "

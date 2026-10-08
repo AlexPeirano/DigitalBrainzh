@@ -1,0 +1,19 @@
+{
+  "input": "data/raw/sub-01/ses-001/sub-01_ses-001_task-mario_eeg_raw.fif",
+  "output": "data/processed/sub-01/ses-001/sub-01_ses-001_task-mario_eeg.fif",
+  "status": "success",
+  "metrics": {
+    "n_channels": 32,
+    "n_samples": 15000,
+    "sfreq_hz": 250.0,
+    "duration_s": 60.0,
+    "bad_channels": [
+      "EEG002"
+    ],
+    "n_bad_channels": 1,
+    "filter_l_freq_hz": 1.0,
+    "filter_h_freq_hz": 40.0,
+    "amplitude_mean_uv": 4.881,
+    "quality": "good"
+  }
+}

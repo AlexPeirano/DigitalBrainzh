@@ -1,0 +1,9 @@
+{
+  "subject": "01",
+  "session": "001",
+  "task": "mario",
+  "sfreq_hz": 250.0,
+  "n_channels": 32,
+  "duration_s": 60.0,
+  "format": "fif (MNE synthetic)"
+}
