@@ -36,9 +36,10 @@ jobs:
       - name: Get raw EEG files
         working-directory: ${{ runner.temp }}/dbzh
         run: |
-          datalad get data/raw/**/*.edf data/raw/**/*.fif data/raw/**/*.set 2>/dev/null || true
+          # Get all EEG files recursively from data/raw
+          datalad get -r data/raw/ || true
           echo "Fichiers bruts disponibles :"
-          find data/raw -name "*.edf" -o -name "*.fif" -o -name "*.set" | sort
+          find data/raw -type f \( -name "*.edf" -o -name "*.fif" -o -name "*.set" \) | sort
 
       # 4. Lancer le prétraitement (auto-détection des nouveaux fichiers)
       - name: Preprocess new EEG files
