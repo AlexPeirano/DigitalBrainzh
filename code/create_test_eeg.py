@@ -21,7 +21,10 @@ def main():
     parser.add_argument("--output-dir", default="data/raw")
     args = parser.parse_args()
 
-    session_dir = Path(args.output_dir) / f"sub-{args.subject}" / f"ses-{args.session}"
+    # Use absolute path from git root to avoid creating files in wrong location
+    git_root = Path(__file__).parent.parent
+    output_dir = git_root / args.output_dir
+    session_dir = output_dir / f"sub-{args.subject}" / f"ses-{args.session}"
     session_dir.mkdir(parents=True, exist_ok=True)
     base = f"sub-{args.subject}_ses-{args.session}_task-{args.task}"
 
