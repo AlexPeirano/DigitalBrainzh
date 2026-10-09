@@ -19,7 +19,7 @@ jobs:
           sudo apt-get install -y git-annex
 
       - name: Install Python dependencies
-        run: pip install datalad mne numpy git-annex-remote-osf
+        run: pip install datalad datalad-osf mne numpy
 
       # 2. Cloner le dataset DataLad (juste les pointeurs, sans les gros fichiers)
       - name: Clone DataLad dataset
