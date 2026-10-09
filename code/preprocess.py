@@ -37,10 +37,10 @@ def get_output_path(input_path: Path) -> Path:
     path_str = str(input_path)
     output_str = path_str.replace("data/raw", "data/processed")
 
-    # Change extension to _eeg.fif
+    # Change to MNE-compliant naming: _eeg.fif
     for ext in ["_eeg.edf", "_eeg.fif", "_eeg.set", ".edf", ".fif", ".set"]:
         if output_str.endswith(ext):
-            output_str = output_str.replace(ext, "_processed.fif")
+            output_str = output_str.replace(ext, "_processed_eeg.fif")
             break
 
     return Path(output_str)

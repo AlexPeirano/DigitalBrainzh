@@ -56,10 +56,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Vérifier s'il y a des changements à pusher
-          if git diff --quiet && git diff --staged --quiet; then
-            echo "Rien de nouveau à pusher."
+          # Check if there are new commits to push
+          if [ -z "$(git log origin/main..HEAD)" ]; then
+            echo "No new commits to push."
           else
+            echo "New commits found, pushing results..."
+
             # Push commits and metadata to GitHub
             datalad push --to origin
             echo "✓ Commits pushed to GitHub"
