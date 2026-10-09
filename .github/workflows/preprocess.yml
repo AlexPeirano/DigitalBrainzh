@@ -40,42 +40,13 @@ jobs:
           echo "Fichiers bruts disponibles :"
           find data/raw -name "*.edf" -o -name "*.fif" -o -name "*.set" | sort
 
-      # 4. Lancer le prétraitement avec provenance DataLad
-      #    datalad run enregistre : quelle commande, quel input, quel output
+      # 4. Lancer le prétraitement (auto-détection des nouveaux fichiers)
       - name: Preprocess new EEG files
         working-directory: ${{ runner.temp }}/dbzh
         run: |
-          set -e
-          processed=0
-
-          find data/raw -name "*_eeg.edf" -o -name "*_eeg.fif" -o -name "*_eeg.set" \
-          | sort | while read input_file; do
-
-            # Construire le chemin de sortie correspondant
-            output_file="${input_file/data\/raw/data\/processed}"
-            output_file="${output_file/_eeg.edf/_eeg_filtered.fif}"
-            output_file="${output_file/_eeg.fif/_eeg_filtered.fif}"
-            output_file="${output_file/_eeg.set/_eeg_filtered.fif}"
-
-            # Ne traiter que les fichiers pas encore traités
-            if [ ! -f "$output_file" ]; then
-              echo "--- Traitement : $input_file"
-
-              datalad run \
-                --input  "$input_file" \
-                --output "$output_file" \
-                --message "ci: preprocess $(basename $input_file)" \
-                "python code/preprocess.py \
-                  --input  {inputs} \
-                  --output {outputs}"
-
-              processed=$((processed + 1))
-            else
-              echo "--- Déjà traité, ignoré : $output_file"
-            fi
-          done
-
-          echo "Fichiers traités : $processed"
+          datalad run \
+            --message "ci: preprocess new EEG files" \
+            "python code/preprocess.py"
 
       # 5. Pousser les résultats vers GitHub
       #    (les gros .fif vont dans l'annex, les JSON de rapport dans Git)
