@@ -7,6 +7,10 @@ on:
     paths:
       - 'data/raw/**'
 
+# Grant write permissions to push results back
+permissions:
+  contents: write
+
 jobs:
   preprocess:
     runs-on: ubuntu-latest
