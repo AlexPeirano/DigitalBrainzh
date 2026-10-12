@@ -1,0 +1,8 @@
+{
+  "input": "data/raw/sub-04/ses-001/sub-04_ses-001_task-final-test_eeg.fif",
+  "output": "data/processed/sub-04/ses-001/sub-04_ses-001_task-final-test_processed_eeg.fif",
+  "status": "success",
+  "n_channels": 4,
+  "sfreq_hz": 100.0,
+  "duration_s": 10.0
+}
