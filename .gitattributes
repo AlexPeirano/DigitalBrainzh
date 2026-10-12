@@ -15,6 +15,7 @@ data/**/*.csv   annex.largefiles=nothing
 
 # ── Code + config → toujours dans Git ───────────────────────────────────────
 code/**         annex.largefiles=nothing
+*.sh            annex.largefiles=nothing
 *.yml           annex.largefiles=nothing
 *.txt           annex.largefiles=nothing
 *.md            annex.largefiles=nothing
