@@ -1,0 +1,8 @@
+{
+  "input": "data/raw/EEG_A.edf",
+  "output": "data/processed/EEG_A_processed_eeg.fif",
+  "status": "success",
+  "n_channels": 6,
+  "sfreq_hz": 250.0,
+  "duration_s": 86410.0
+}
