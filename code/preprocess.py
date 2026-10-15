@@ -21,10 +21,16 @@ def load_eeg(input_path: Path) -> mne.io.BaseRaw:
 
     if ext == ".edf":
         raw = mne.io.read_raw_edf(str(input_path), preload=True, verbose=False)
+# renvoie un objet RawEDF
     elif ext == ".fif":
         raw = mne.io.read_raw_fif(str(input_path), preload=True, verbose=False)
+# renvoie un objet Raw 
     elif ext == ".set":
         raw = mne.io.read_raw_eeglab(str(input_path), preload=True, verbose=False)
+# renvoie un objet RawEEGLAB
+## Raw, RawEDF, RawEEGLAB héritent de BaseRaw
+
+# preload = True charge les données en RAM sous forme de tableau np (point d'attention)
     else:
         print(f"[ERROR] Unsupported format: {ext}", file=sys.stderr)
         sys.exit(1)
@@ -45,6 +51,7 @@ def get_output_path(input_path: Path) -> Path:
 
     return Path(output_str)
 
+# raw.save exporte le fichier en .fif, si on veux un autre format comme edfil faut passer par une autre fonction
 
 def process_file(input_path: Path, output_path: Path) -> bool:
     """Process a single EEG file. Returns True if successful."""
@@ -59,6 +66,7 @@ def process_file(input_path: Path, output_path: Path) -> bool:
         raw = load_eeg(input_path)
         n_channels = len(raw.ch_names)
         sfreq = raw.info["sfreq"]
+# sampling frequency
         duration = raw.n_times / sfreq
 
         print(f"[INFO] {n_channels} channels | {sfreq} Hz | {duration:.1f}s")
